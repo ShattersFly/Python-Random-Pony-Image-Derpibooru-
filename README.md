@@ -6,7 +6,7 @@ For this to work windows notifications must be enabled in settings as well as in
 For those who dont want to work with python, there will be .exe version(compiled with Pyinstaller) in Releases page
 
 # Customizing
-You can customize a warping 2 settings: Time interval, Tags
+You can customize 2 settings: Time interval, Tags
 On first run app will show where the config file is generated, there will be 2 lines contaning those 2 settings
 interval_minutes - how much time in minutes next image will be sent
 tags - tags that app will search for, it works same as search on derpibooru so make sure to search correct tags otherwise app will break
