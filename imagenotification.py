@@ -60,7 +60,6 @@ except Exception:
     pass
 
 UniverseExists = True
-using = True
 while UniverseExists == True:
         time.sleep(checkFile())
         image = getNewWallpapers()
