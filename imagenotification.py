@@ -1,7 +1,7 @@
 import ctypes.wintypes
 import os
 import random
-import sys
+import platform
 import time
 import webbrowser
 import win10toast_click
@@ -30,6 +30,7 @@ class Error:
     w1 = "Config missing or it's structure corrupt, proceeding with default values\n"
     w2 = "Generate new config by removing the old one and/or launching app again"
     corruptConfig = w1+w2
+    couldntGet = "Couldn't get image, internet or script issue, ignoring current image"
 
 try:
     if not os.path.isfile(configFile):
@@ -91,13 +92,17 @@ def open_url(what):
 
 
 def getNewWallpapers():
-    wallpapers = [image for image in Search().query(*q)]
-    randomimage = random.choice(wallpapers).url
-    seenList.append(randomimage)
-    while randomimage == seenList.index(randomimage): #attempt not to show same images too often
+    try:
+        wallpapers = [image for image in Search().query(*q)]
         randomimage = random.choice(wallpapers).url
-    if len(seenList) >= 5:
-        seenList.pop(len(seenList) - 1)
+        seenList.append(randomimage)
+        while randomimage == seenList.index(randomimage): #attempt not to show same images too often
+            randomimage = random.choice(wallpapers).url
+        if len(seenList) >= 5:
+            seenList.pop(len(seenList) - 1)
+    except Exception:
+        randomimage = ''
+        ctypes.windll.user32.MessageBoxW(0, Error.couldntGet, 'Random Pony 4 U: Error', 0)
     return randomimage
 
 
@@ -108,10 +113,10 @@ buttons = [
     {'activationType': 'protocol', 'arguments': image, 'content': 'Open'}
 ]
 try:
-    if int(list(sys.getwindowsversion())[0]) != 6:
+    if platform.platform().find('Windows-7') == -1 and image != '':
         toast('Random Pony 4 U', "Here's your first image", image=image, buttons=buttons, duration='long',
               on_click=image)
-    else:
+    elif image != '':
         notif.show_toast('Random Pony 4 U', 'Your first pony arrived! Click to open', duration=25,
                          callback_on_click=open_url(image))
 except Exception:
@@ -121,9 +126,9 @@ while True:
     time.sleep(checkFile())
     image = getNewWallpapers()
     try:
-        if int(list(sys.getwindowsversion())[0]) != 6:
+        if platform.platform().find('Windows-7') == -1 and image != '':
             toast('Random Pony 4 U', "Here's your pony", image=image, buttons=buttons, duration='long', on_click=image)
-        else:
+        elif image != '':
             notif.show_toast('Random Pony 4 U', 'Your pony arrived! Click to open', duration=25,
                              callback_on_click=open_url(image))
     except Exception:
