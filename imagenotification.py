@@ -15,6 +15,9 @@ SHGFP_TYPE_CURRENT = 0  # Get current, not default value
 buf = ctypes.create_unicode_buffer(ctypes.wintypes.MAX_PATH)
 ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CURRENT, buf)
 configFile = buf.value + '\\randomponyconfig.ini'
+score_new = [35, 50, 75, 100, 150]
+score_old = [200, 300, 500, 700]
+score_random = [random.randint(30,3000),random.randint(30,3000)]
 
 s1 = "You're running this program for the first time\n"
 s2 = "Config file generated at: "
@@ -31,11 +34,17 @@ class Error:
     w2 = "Generate new config by removing the old one and/or launching app again"
     corruptConfig = w1+w2
     couldntGet = "Couldn't get image, internet or script issue, ignoring current image"
+    invalidScore = "Custom score invalid, ignoring"
 
 try:
     if not os.path.isfile(configFile):
         with open(configFile, 'w') as f:
-            f.write('interval_minutes=20\n'+'tags='+defaultTags)
+            f.write('interval_minutes=20\n'+'tags='+defaultTags+"\n")
+            f.write("image_by_date=new\n")
+            f.write("custom_score_range=30,100\n")
+            f.write("# image_by_date can be either - new, old, random, custom. Example image_by_date=random")
+            f.write("# custom_score_range determines which range of score will be chosen to search\n")
+            f.write("# value must contain at least two numbers. Example: custom_score_range=30,300\n")
             f.close()
         ctypes.windll.user32.MessageBoxW(0,'{}{}{}{}{}{}'.format(s1,s2,buf.value+'\n',s3,s4,s5), 'Random Pony 4 U: Notice', 0)
     else:
@@ -44,6 +53,20 @@ try:
                 lines = config.readlines()
                 intervaloftime = 60 * lines[0].replace('interval_minutes=','')
                 defaultTags = lines[1].replace('tags=','')
+                if lines[2].replace('image_by_date=','') == "new":
+                    score = score_new
+                elif lines[2].replace('image_by_date=','') == "old":
+                    score = score_old
+                elif lines[2].replace('image_by_date=','') == "random":
+                    score = score_random
+                elif lines[2].replace('image_by_date=','') == "custom":
+                    try:
+                        score = lines[3].replace('custom_score_range=','').split(',')
+                    except Exception:
+                        ctypes.windll.user32.MessageBoxW(0, Error.invalidScore, 'Random Pony 4 U: Error', 0)
+                        score = score_new
+                else:
+                    score = score_new
         except Exception:
             ctypes.windll.user32.MessageBoxW(0, Error.corruptConfig, 'Random Pony 4 U: Error', 0)
 except Exception:
@@ -55,7 +78,8 @@ def checkFile():    # default to 20 minutes if config file was removed during pr
     try:
         if os.path.isfile(configFile):
             with open(configFile) as config:
-                intervaloftime = 60 * int(config.readlines()[0].replace('interval_minutes=',""))
+                config3 = config.readlines()
+                intervaloftime = 60 * int(config3[0].replace('interval_minutes=',""))
         else:
             intervaloftime = 1200
         return intervaloftime
@@ -69,13 +93,14 @@ def checkTags(dt):
     try:
         if os.path.isfile(configFile):
             with open(configFile) as config:
-                newTags = config.readlines()[1].replace('tags=',"")
+                lines = config.readlines()
+                newTags = lines[1].replace('tags=',"")
         return newTags
     except Exception:
         ctypes.windll.user32.MessageBoxW(0, Error.corruptConfig, 'Random Pony 4 U: Error', 0)
         return defaultTags
 
-score = [35, 150, 200, 300, 500, 700]
+
 q = {
     checkTags(defaultTags),
     query.score >= random.choice(score)
