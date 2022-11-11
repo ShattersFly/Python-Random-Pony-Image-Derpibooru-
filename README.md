@@ -6,8 +6,9 @@ For this to work windows notifications must be enabled in settings as well as in
 For those who dont want to work with python, there will be .exe version(compiled with Pyinstaller) in Releases page
 
 # Customizing
-You can customize 2 settings: Time interval, Tags
-On first run - app will show where the config file is generated, there will be 2 lines contaning those 2 settings
-interval_minutes - how much time in minutes should pass before next image will be sent
-tags - tags that app will search for, it works same as search on derpibooru so make sure to search correct tags otherwise app will break
-(also dont add anything unnessecary or it will also break)
+In generated config that the path of which will be shown to you on first run you can customize several things:
+
+interval_minutes - interval in minutes before new image will be sent(def. 20)
+tags - which tags image must have or not have, works the same as search on derpibooru, so make sure to correctly set them
+image_by_date - uses score of the image to show you new, old, whatever images. there are 4 modes: new, old, random, custom (def. new)
+custom_score_range - if image_by_date is set to custom you define range of score you want your images to have, must contain at least two numbers, for example: custom_score_range=30,500
