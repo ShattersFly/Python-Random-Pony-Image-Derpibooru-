@@ -17,7 +17,7 @@ ctypes.windll.shell32.SHGetFolderPathW(None, CSIDL_PERSONAL, None, SHGFP_TYPE_CU
 configFile = buf.value + '\\randomponyconfig.ini'
 score_new = [35, 50, 75, 100, 150]
 score_old = [200, 300, 500, 700]
-score_random = [random.randint(30,3000),random.randint(30,3000)]
+randomScores = False
 
 s1 = "You're running this program for the first time\n"
 s2 = "Config file generated at: "
@@ -51,17 +51,18 @@ try:
         try:
             with open(configFile) as config:
                 lines = config.readlines()
-                intervaloftime = 60 * lines[0].replace('interval_minutes=','')
+                intervaloftime = 60 * lines[0].replace('interval_minutes=','').strip()
                 defaultTags = lines[1].replace('tags=','')
-                if lines[2].replace('image_by_date=','') == "new":
+                if lines[2].replace('image_by_date=','').strip().find('new') == 0:
                     score = score_new
-                elif lines[2].replace('image_by_date=','') == "old":
+                elif lines[2].replace('image_by_date=','').strip().find('old') == 0:
                     score = score_old
-                elif lines[2].replace('image_by_date=','') == "random":
-                    score = score_random
-                elif lines[2].replace('image_by_date=','') == "custom":
+                elif lines[2].replace('image_by_date=','').strip().find('random') == 0:
+                    score = score_random = [random.randint(30,3000),random.randint(30,3000)]
+                    randomScores = True
+                elif lines[2].replace('image_by_date=','').strip().find('custom') == 0:
                     try:
-                        score = lines[3].replace('custom_score_range=','').split(',')
+                        score = lines[3].replace('custom_score_range=','').replace("\n",'').split(',')
                     except Exception:
                         ctypes.windll.user32.MessageBoxW(0, Error.invalidScore, 'Random Pony 4 U: Error', 0)
                         score = score_new
@@ -101,11 +102,6 @@ def checkTags(dt):
         return defaultTags
 
 
-q = {
-    checkTags(defaultTags),
-    query.score >= random.choice(score)
-}
-
 seenList = []
 
 
@@ -116,9 +112,15 @@ def open_url(what):
         pass
 
 
+def getScores(cs):
+    if randomScores:
+        return random.randint(30,3000)
+    else:
+        return random.choice(cs)
+
 def getNewWallpapers():
     try:
-        wallpapers = [image for image in Search().query(*q)]
+        wallpapers = [image for image in Search().query(checkTags(defaultTags),query.score >= getScores(score))]
         randomimage = random.choice(wallpapers).url
         seenList.append(randomimage)
         while randomimage == seenList.index(randomimage): #attempt not to show same images too often
@@ -135,7 +137,7 @@ image = getNewWallpapers()
 notif = win10toast_click.ToastNotifier()
 
 buttons = [
-    {'activationType': 'protocol', 'arguments': image, 'content': 'Open'}
+    {'activationType': 'protocol', 'arguments': image, 'content': 'Open'},
 ]
 try:
     if platform.platform().find('Windows-7') == -1 and image != '':
