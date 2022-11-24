@@ -123,10 +123,13 @@ def getNewWallpapers():
         wallpapers = [image for image in Search().query(checkTags(defaultTags),query.score >= getScores(score))]
         randomimage = random.choice(wallpapers).url
         seenList.append(randomimage)
-        while randomimage == seenList.index(randomimage): #attempt not to show same images too often
-            randomimage = random.choice(wallpapers).url
-        if len(seenList) >= 5:
-            seenList.pop(len(seenList) - 1)
+        try:
+            while seenList.index(randomimage) != None: #attempt not to show same images too often
+                randomimage = random.choice(wallpapers).url
+        except Exception:
+            pass
+        if len(seenList) >= 150:
+            seenList.clear()
     except Exception:
         randomimage = ''
         ctypes.windll.user32.MessageBoxW(0, Error.couldntGet, 'Random Pony 4 U: Error', 0)
