@@ -124,7 +124,7 @@ def getNewWallpapers():
         randomimage = random.choice(wallpapers).url
         seenList.append(randomimage)
         try:
-            while seenList.index(randomimage) != None: #attempt not to show same images too often
+            while randomimage in seenList: #attempt not to show same images too often
                 randomimage = random.choice(wallpapers).url
         except Exception:
             pass
